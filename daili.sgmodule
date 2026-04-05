@@ -1,4 +1,4 @@
-/** * 桌面小组件 1: ✈️ 代理检测 (像素级统一字号版) */
+ /** * 桌面小组件 1: ✈️ 代理检测 (像素级统一字号版) */
 export default async function(ctx) {
   const BG_COLORS = [
     { light: '#FDFBF7', dark: '#FDFBF7' },
