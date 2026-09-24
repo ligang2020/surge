@@ -1,0 +1,19 @@
+#!name=Spotify 去广告（Surge 实验版）
+#!desc=针对 Spotify iOS 的旧版规则修订：避免 304 缓存，精准匹配二进制配置响应；不保证 Spotify 服务端广告可被拦截。
+#!category=Spotify
+#!author=001ProMax, app2smile; local adaptation 2026-09-24
+# 仅供 Surge 使用，不可导入 OpenClash/MosDNS；启用前关闭其他 Spotify 模块。
+# 此模块使用第三方脚本修改客户端收到的配置响应，并非 Spotify 官方功能。
+# 必须在 Surge 安装并信任 MITM CA，启用 HTTPS 解密；无法解密时不会生效。
+# 切勿使用原模块对 (ad-|pendragon) 全路径返回空响应，以免误伤非广告 API。
+
+[Header Rewrite]
+# 避免旧的 304 缓存响应绕过配置脚本。
+http-request ^https:\/\/(?:spclient\.wg\.spotify\.com|[A-Za-z0-9-]+-spclient\.spotify\.com)(?::443)?\/user-customization-service\/v1\/customize(?:\?.*)?$ header-del if-none-match
+
+[Script]
+# 原作者 app2smile 的 protobuf 脚本。仅处理精确的两个配置 API，不拦截音频流。
+spotify-ad-config = type=http-response, pattern=^https:\/\/(?:spclient\.wg\.spotify\.com|[A-Za-z0-9-]+-spclient\.spotify\.com)(?::443)?\/(?:bootstrap\/v1\/bootstrap|user-customization-service\/v1\/customize)(?:\?.*)?$, requires-body=1, binary-body-mode=1, max-size=0, script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/spotify-proto.js
+
+[MITM]
+hostname = %APPEND% spclient.wg.spotify.com, *-spclient.spotify.com
